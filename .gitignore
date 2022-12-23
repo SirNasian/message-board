@@ -1,3 +1,4 @@
+dist/**/*.txt
 dist/public/js/client.js
 dist/server.js
 node_modules

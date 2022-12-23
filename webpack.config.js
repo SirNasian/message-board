@@ -22,7 +22,7 @@ const shared =  {
 module.exports = [
 	{
 		...shared,
-		entry: "./src/client.ts",
+		entry: "./src/client.tsx",
 		target: ["web"],
 		output: {
 			...shared.output,
