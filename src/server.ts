@@ -1,7 +1,11 @@
+import * as bodyParser from "body-parser";
 import * as express from "express";
 
-const server_port = Number(process.env.SERVER_PORT ?? 3000);
+import { requestAuthorizationGrant, registerUser } from "./auth";
 
-const app = express();
-app.use(express.static("public"));
-app.listen(server_port);
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
+const server = express();
+server.use(express.static("public"));
+server.post("/api/auth", urlencodedParser, requestAuthorizationGrant);
+server.post("/api/auth/register", urlencodedParser, registerUser);
+server.listen(Number(process.env.SERVER_PORT ?? 3000));
