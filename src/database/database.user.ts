@@ -3,8 +3,10 @@ import { db_pool } from ".";
 
 export class RegistrationError {
 	message: string;
-	constructor(message: string) {
+	http_status_code: number;
+	constructor(message: string, http_status_code: number) {
 		this.message = message;
+		this.http_status_code = http_status_code;
 	}
 }
 
@@ -27,7 +29,7 @@ export const registerUser = async (
 		.catch((e: { code: string }) => {
 			switch (e.code) {
 				case "ER_DUP_ENTRY":
-					throw new RegistrationError("Username Exists");
+					throw new RegistrationError("Username Exists", 409);
 				default:
 					console.error(e);
 					throw e;

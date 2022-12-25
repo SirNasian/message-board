@@ -44,7 +44,9 @@ export const registerUser = async (
 		.then(() => res.status(200).send("Registration Successful"))
 		.catch((e: unknown) => {
 			if (e instanceof RegistrationError)
-				res.status(500).send(`Registration Failure: ${e.message}`);
+				res
+					.status(e.http_status_code)
+					.send(`Registration Failure: ${e.message}`);
 			else {
 				res.status(500).send("Registration Error");
 				throw e;
