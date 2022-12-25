@@ -1,8 +1,8 @@
-import { useState } from "react";
+import * as React from "react";
 import { createRoot } from "react-dom/client";
 
 const Counter = () => {
-	const [count, setCount] = useState<number>(0);
+	const [count, setCount] = React.useState<number>(0);
 	return <button onClick={() => setCount(count + 1)}>{count}</button>;
 };
 

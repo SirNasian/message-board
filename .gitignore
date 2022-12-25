@@ -1,4 +1,5 @@
 dist/**/*.txt
-dist/public/js/client.js
+dist/public/js/authorization.js
+dist/public/js/message-board.js
 dist/server.js
 node_modules

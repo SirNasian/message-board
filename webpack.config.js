@@ -1,6 +1,6 @@
 const path = require("path");
 
-const shared =  {
+const shared = {
 	module: {
 		rules: [
 			{
@@ -22,16 +22,19 @@ const shared =  {
 module.exports = [
 	{
 		...shared,
-		entry: "./src/client.tsx",
+		entry: {
+			authorization: "./src/authorization.tsx",
+			"message-board": "./src/message-board.tsx",
+		},
 		target: ["web"],
 		output: {
 			...shared.output,
-			filename: "public/js/client.js",
+			filename: "public/js/[name].js",
 		},
 	},
 	{
 		...shared,
-		entry: {server: "./src/server.ts"},
+		entry: { server: "./src/server.ts" },
 		target: ["node"],
-	}
+	},
 ];
