@@ -1,3 +1,4 @@
+import * as bcryptjs from "bcryptjs";
 import { RowDataPacket } from "mysql2";
 import { db_pool } from ".";
 
@@ -14,6 +15,7 @@ export const registerUser = async (
 	username: string,
 	password: string
 ): Promise<void> => {
+	const password_hash = await bcryptjs.hash(password, 10);
 	await db_pool
 		.execute(
 			`
@@ -22,8 +24,7 @@ export const registerUser = async (
 			`,
 			{
 				username: username,
-				// TODO: hash password
-				password: password,
+				password: password_hash,
 			}
 		)
 		.catch((e: { code: string }) => {
@@ -37,8 +38,8 @@ export const registerUser = async (
 		});
 };
 
-interface SuccessRow extends RowDataPacket {
-	success: boolean;
+interface PasswordHashRow extends RowDataPacket {
+	password: string;
 }
 
 export const validateCredentials = async (
@@ -46,10 +47,10 @@ export const validateCredentials = async (
 	password: string
 ): Promise<boolean> => {
 	return db_pool
-		.query<SuccessRow[]>(
-			"SELECT (COUNT(*) = 1) AS success FROM user WHERE (username = :username) AND (password = :password);",
-			// TODO: hash password
-			{ username: username, password: password }
+		.query<PasswordHashRow[]>(
+			"SELECT password FROM user WHERE (username = :username);",
+			{ username: username }
 		)
-		.then((response) => response[0][0].success);
+		.then((response) => response[0][0].password)
+		.then((password_hash) => bcryptjs.compare(password, password_hash));
 };
