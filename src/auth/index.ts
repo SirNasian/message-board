@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { AuthenticationError } from "./AuthenticationError";
+import { ensureValidScope } from "./Scope";
+import { generateAuthorizationCode } from "../database/database.auth";
 import {
 	validateCredentials,
 	registerUser as dbRegisterUser,
@@ -13,23 +15,34 @@ export const requestAuthorizationGrant = async (
 	res: Response
 ): Promise<void> => {
 	try {
-		const [username, password] = parseAuthorizationHeader(
-			req.headers?.authorization ?? ""
-		);
+		const { response_type, scope, code } = req.body;
+		switch (response_type) {
+			case "code":
+				const [username, password] = parseAuthorizationHeader(
+					req.headers?.authorization ?? ""
+				);
 
-		if (!(await validateCredentials(username, password)))
-			throw new AuthenticationError("Incorrect username/password");
+				if (!code && !(await validateCredentials(username, password)))
+					throw new AuthenticationError("incorrect username/password");
 
-		// TODO: consider requested scope
-		// TODO: generate authorization code
+				const valid_scope = ensureValidScope(scope);
+				const new_code = await generateAuthorizationCode(username, valid_scope);
+				res.status(200).send(new_code);
+				break;
 
-		res.send("success!");
+			case "token":
+				// TODO: implement this
+				res.status(501).send(code);
+				break;
+
+			default:
+				res.status(400).send("unknown response_type");
+		}
 	} catch (e: unknown) {
 		if (e instanceof AuthenticationError)
 			res.set("WWW-Authenticate", "Basic").status(401).send(e.message);
-		else if (e instanceof Error) res.status(500).send(e.message);
 		else {
-			res.status(500).send("Authentication Error");
+			res.sendStatus(500);
 			throw e;
 		}
 	}

@@ -29,7 +29,7 @@ export const registerUser = async (
 		.catch((e: { code: string }) => {
 			switch (e.code) {
 				case "ER_DUP_ENTRY":
-					throw new RegistrationError("Username Exists", 409);
+					throw new RegistrationError("username already exists", 409);
 				default:
 					console.error(e);
 					throw e;

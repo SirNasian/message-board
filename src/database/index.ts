@@ -5,4 +5,5 @@ export const db_pool = createPool({
 	password: process.env?.DATABASE_PASS ?? "messageboard_pass",
 	database: process.env?.DATABASE_NAME ?? "messageboard",
 	namedPlaceholders: true,
+	multipleStatements: true,
 });
