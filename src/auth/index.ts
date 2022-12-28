@@ -3,7 +3,8 @@ import { AuthenticationError } from "./AuthenticationError";
 import { ensureValidScope } from "./Scope";
 import { generateAuthorizationCode } from "../database/database.auth";
 import {
-	validateCredentials,
+	validateClientRedirection,
+	validateUserCredentials,
 	registerUser as dbRegisterUser,
 	RegistrationError,
 } from "../database/database.user";
@@ -15,24 +16,29 @@ export const requestAuthorizationGrant = async (
 	res: Response
 ): Promise<void> => {
 	try {
-		const { response_type, scope, code } = req.body;
+		const { response_type, client_id, redirect_uri, scope } = req.body;
 		switch (response_type) {
 			case "code":
 				const [username, password] = parseAuthorizationHeader(
 					req.headers?.authorization ?? ""
 				);
 
-				if (!code && !(await validateCredentials(username, password)))
+				if (!(await validateClientRedirection(client_id, redirect_uri)))
+					throw new AuthenticationError(
+						"redirection uri not registered for client"
+					);
+
+				if (!(await validateUserCredentials(username, password)))
 					throw new AuthenticationError("incorrect username/password");
 
 				const valid_scope = ensureValidScope(scope);
-				const new_code = await generateAuthorizationCode(username, valid_scope);
+				const new_code = await generateAuthorizationCode(client_id, username, valid_scope);
 				res.status(200).send(new_code);
 				break;
 
 			case "token":
 				// TODO: implement this
-				res.status(501).send(code);
+				res.sendStatus(501);
 				break;
 
 			default:

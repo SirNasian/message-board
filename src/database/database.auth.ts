@@ -6,6 +6,7 @@ interface GeneratedCodeRow extends RowDataPacket {
 }
 
 export const generateAuthorizationCode = async (
+	client_id: string,
 	username: string,
 	scope: string
 ): Promise<string> => {
@@ -13,11 +14,12 @@ export const generateAuthorizationCode = async (
 		.query<GeneratedCodeRow[]>(
 			`
 				SET @code = UUID();
-				INSERT INTO authorization_code (code, username, scope)
-				VALUES (@code, :username, :scope);
+				INSERT INTO authorization_code (code, client_id, username, scope)
+				VALUES (@code, :client_id, :username, :scope);
 				SELECT @code AS code;
 			`,
 			{
+				client_id: client_id,
 				username: username,
 				scope: scope,
 			}
